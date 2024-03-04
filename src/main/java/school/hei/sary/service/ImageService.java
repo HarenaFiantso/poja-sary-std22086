@@ -1,9 +1,12 @@
 package school.hei.sary.service;
 
+import ij.IJ;
+import ij.ImagePlus;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.hei.sary.file.BucketComponent;
+import ij.process.ImageConverter;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -22,5 +25,18 @@ public class ImageService {
     if (!isDelete) {
       throw new RuntimeException("file " + bucketKey + " is not deleted.");
     }
+  }
+
+  private File convertImageToBlackAndWhite(File originalFile, File outputFile) {
+    ImagePlus image = IJ.openImage(originalFile.getPath());
+    try {
+      ImageConverter converter = new ImageConverter(image);
+      converter.convertToGray8();
+    } catch (Exception e) {
+      throw new RuntimeException("Image file invalid");
+    }
+    ij.io.FileSaver fileSaver = new ij.io.FileSaver(image);
+    fileSaver.saveAsPng(outputFile.getPath());
+    return outputFile;
   }
 }
